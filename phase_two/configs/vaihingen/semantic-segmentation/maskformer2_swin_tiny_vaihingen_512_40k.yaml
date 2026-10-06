@@ -1,0 +1,28 @@
+# =============================================================================
+# REFERENCE CONFIG: 40K ITERATIONS (No Boundary Loss) - VAIHINGEN
+# =============================================================================
+# Extended training to 40k iterations for fair comparison with boundary loss
+# experiments that may need more iterations to converge.
+#
+# Based on: maskformer2_swin_tiny_vaihingen_512_multiscale.yaml
+# (Uses correct ADE20K pretrained Swin weights + multi-scale training)
+#
+# Previous 10k reference achieved: 70.24% mIoU
+# =============================================================================
+
+_BASE_: maskformer2_swin_tiny_vaihingen_512_multiscale.yaml
+
+# =============================================================================
+# SOLVER: Extended to 40k iterations
+# =============================================================================
+SOLVER:
+  MAX_ITER: 40000
+  CHECKPOINT_PERIOD: 2000
+
+# =============================================================================
+# TEST: Evaluate every 2k iterations
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 2000
+
+OUTPUT_DIR: "./output/vaihingen_reference_40k"

@@ -1,0 +1,38 @@
+# =============================================================================
+# VAIHINGEN: OPTION 1+2+3 COMBINED (Best LoveDA config)
+# =============================================================================
+# Applying the best boundary loss configuration from LoveDA experiments.
+#
+# Configuration:
+#   - BOUNDARY_WEIGHT: 0.1 (reduced weight)
+#   - BOUNDARY_WARMUP_ITERS: 5000 (curriculum learning)
+#   - BOUNDARY_RAMPUP_ITERS: 0 (instant activation after warmup)
+#   - BOUNDARY_NORMALIZE: True (tanh normalization)
+#
+# This worked best on LoveDA (+0.56% mIoU improvement)
+# =============================================================================
+
+_BASE_: Base-Vaihingen-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 0.1
+    BOUNDARY_WARMUP_ITERS: 5000
+    BOUNDARY_RAMPUP_ITERS: 0
+    BOUNDARY_NORMALIZE: True
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+
+# =============================================================================
+# SOLVER: Extended to 40k iterations
+# =============================================================================
+SOLVER:
+  MAX_ITER: 40000
+  CHECKPOINT_PERIOD: 2000
+
+# =============================================================================
+# TEST: Evaluate every 2k iterations
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 2000
+
+OUTPUT_DIR: "./output/vaihingen_boundary_option1_2_3_40k"

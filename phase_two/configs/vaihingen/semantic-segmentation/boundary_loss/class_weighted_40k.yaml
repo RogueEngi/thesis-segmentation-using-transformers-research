@@ -1,0 +1,47 @@
+# =============================================================================
+# VAIHINGEN: CLASS-WEIGHTED BOUNDARY LOSS WITH HIGH WEIGHT RAMP-UP
+# =============================================================================
+# Per-class boundary weights based on IoU improvement analysis from
+# high_weight_rampup_40k experiment (iter 9999 → iter 39999).
+#
+# IoU Changes (from vaihingen_high_weight_iter9999_vs_39999.csv):
+#   - Impervious Surface: -2.16 → weight 0.5 (decreased, reduce boundary influence)
+#   - Building:           +0.41 → weight 1.0 (slight improvement)
+#   - Low Vegetation:     +1.58 → weight 1.5 (good improvement)
+#   - Tree:               +0.13 → weight 1.0 (minimal change)
+#   - Car:                +0.52 → weight 1.2 (slight improvement, small objects)
+#   - Clutter:            -5.00 → weight 0.2 (significant decrease, avoid!)
+#
+# Class order (after reduce_zero_label): 
+#   0=impervious_surface, 1=building, 2=low_vegetation, 3=tree, 4=car, 5=clutter
+#
+# Strategy: Lower weights for classes that got worse with boundary loss,
+#           higher weights for classes that benefited.
+# =============================================================================
+
+_BASE_: Base-Vaihingen-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 10.0
+    BOUNDARY_WARMUP_ITERS: 5000
+    BOUNDARY_RAMPUP_ITERS: 10000  # Full weight at iter 15000
+    BOUNDARY_NORMALIZE: True
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+    # Per-class weights: [impervious_surface, building, low_vegetation, tree, car, clutter]
+    BOUNDARY_CLASS_WEIGHTS: [0.5, 1.0, 1.5, 1.0, 1.2, 0.1]
+
+# =============================================================================
+# SOLVER: Extended to 40k iterations
+# =============================================================================
+SOLVER:
+  MAX_ITER: 40000
+  CHECKPOINT_PERIOD: 2000
+
+# =============================================================================
+# TEST: Evaluate every 2k iterations
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 2000
+
+OUTPUT_DIR: "./output/vaihingen_class_weighted_boundary_40k"

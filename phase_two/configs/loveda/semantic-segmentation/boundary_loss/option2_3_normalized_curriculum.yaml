@@ -1,0 +1,20 @@
+# =============================================================================
+# OPTION 2+3 COMBINED: NORMALIZED + CURRICULUM LEARNING
+# =============================================================================
+# Combines two strategies:
+#   1. Normalized distances (tanh) to bound loss values
+#   2. Curriculum learning (5000 iter warmup) to learn basics first
+#
+# This should be the most stable configuration.
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 1.0
+    BOUNDARY_WARMUP_ITERS: 5000  # Enable after warmup
+    BOUNDARY_NORMALIZE: True
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+
+OUTPUT_DIR: "./output/loveda_boundary_option2_3_normalized_curriculum"

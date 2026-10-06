@@ -1,0 +1,25 @@
+# =============================================================================
+# OPTION 1: REDUCED BOUNDARY LOSS WEIGHT
+# =============================================================================
+# The original BOUNDARY_WEIGHT=1.0 produced loss values of -3 to -7 per layer,
+# which dominated the total loss (making it negative: total_loss: -39.33).
+#
+# This config reduces the weight to 0.1 to better balance boundary loss with
+# other losses (BCE=5.0, Dice=5.0, CE=2.0).
+#
+# Expected effect:
+#   - Boundary contribution: (-5) × 10 × 0.1 = -5 (vs -50 before)
+#   - Total loss should remain positive and stable
+#   - More gradual boundary refinement
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    # Reduced boundary loss weight (10x smaller than before)
+    BOUNDARY_WEIGHT: 0.1
+    BOUNDARY_WARMUP_ITERS: 0  # Enable from start
+    BOUNDARY_NORMALIZE: False
+
+OUTPUT_DIR: "./output/loveda_boundary_option1_reduced_weight"

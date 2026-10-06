@@ -1,0 +1,44 @@
+# =============================================================================
+# HIGHER BOUNDARY WEIGHT: GRADUAL RAMP-UP TO 2.0
+# =============================================================================
+# Testing if a STRONGER boundary loss weight produces better results.
+#
+# Hypothesis: The 0.1 weight might be too weak to enforce boundary refinement.
+# This config ramps up to weight=2.0 (20x stronger than previous experiments).
+#
+# Schedule:
+#   - Iter 0-5000:     weight = 0 (warmup, no boundary loss)
+#   - Iter 5000-15000: weight gradually increases 0 → 2.0 (linear ramp-up)  
+#   - Iter 15000+:     weight = 2.0 (full weight)
+#
+# Configuration:
+#   - BOUNDARY_WEIGHT: 2.0 (much stronger than 0.1)
+#   - BOUNDARY_WARMUP_ITERS: 5000 (no boundary loss)
+#   - BOUNDARY_RAMPUP_ITERS: 10000 (gradual increase)
+#   - BOUNDARY_NORMALIZE: True (important with higher weight!)
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 10.0
+    BOUNDARY_WARMUP_ITERS: 5000
+    BOUNDARY_RAMPUP_ITERS: 10000  # Full weight at iter 15000
+    BOUNDARY_NORMALIZE: True
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+
+# =============================================================================
+# SOLVER: Extended to 40k iterations
+# =============================================================================
+SOLVER:
+  MAX_ITER: 40000
+  CHECKPOINT_PERIOD: 2000
+
+# =============================================================================
+# TEST: Evaluate every 2k iterations
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 2000
+
+OUTPUT_DIR: "./output/loveda_boundary_high_weight_rampup_40k"

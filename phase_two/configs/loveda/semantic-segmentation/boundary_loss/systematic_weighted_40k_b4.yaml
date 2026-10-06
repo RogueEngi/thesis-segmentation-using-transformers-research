@@ -1,0 +1,52 @@
+# =============================================================================
+# LOVEDA: SYSTEMATIC CLASS-WEIGHTED BOUNDARY LOSS
+# =============================================================================
+# Per-class weights derived using LINEAR NORMALIZATION based on each class's
+# response to uniform boundary loss (HW_vs_Ref_Delta).
+#
+# Formula:
+#   w_c = w_min + [(Δ_c - Δ_min) / (Δ_max - Δ_min)] × (w_max - w_min)
+#
+# Parameters:
+#   - w_min = 0.5 (class most hurt by boundary loss)
+#   - w_max = 2.0 (class most helped by boundary loss)
+#   - Δ_min = -1.22% (Road)
+#   - Δ_max = +2.18% (Building)
+#
+# Weight Derivation:
+#   Class        | HW_vs_Ref_Δ | Normalized | Weight
+#   -------------|-------------|------------|-------
+#   Background   |   -0.90%    |    0.094   |  0.64
+#   Building     |   +2.18%    |    1.000   |  2.00  (max - most helped)
+#   Road         |   -1.22%    |    0.000   |  0.50  (min - most hurt)
+#   Water        |   +0.73%    |    0.574   |  1.36
+#   Barren       |   +1.23%    |    0.721   |  1.58
+#   Forest       |   +0.02%    |    0.365   |  1.05
+#   Agricultural |   +1.87%    |    0.909   |  1.86
+#
+# Class order: [background, building, road, water, barren, forest, agricultural]
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 10.0
+    BOUNDARY_WARMUP_ITERS: 5000
+    BOUNDARY_RAMPUP_ITERS: 10000
+    BOUNDARY_NORMALIZE: True
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+    # Systematically derived weights: min=0.5, max=2.0
+    BOUNDARY_CLASS_WEIGHTS: [0.64, 2.0, 0.5, 1.36, 1.58, 1.05, 1.86]
+
+SOLVER:
+  MAX_ITER: 40000
+  CHECKPOINT_PERIOD: 2000
+
+  IMS_PER_BATCH: 4
+  BASE_LR: 0.0001
+
+TEST:
+  EVAL_PERIOD: 2000
+
+OUTPUT_DIR: "./output/loveda_systematic_weighted_40k_b4"

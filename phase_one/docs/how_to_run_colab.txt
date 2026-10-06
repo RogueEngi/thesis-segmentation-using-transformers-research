@@ -1,0 +1,3 @@
+python mmsegmentation-main/tools/train.py \
+       configs/setr_vit-l_naive_b2-20k_vaihingen-512x512.py \
+       --work-dir work_dirs/setr_1

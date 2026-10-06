@@ -1,0 +1,30 @@
+# =============================================================================
+# OPTION 2: NORMALIZED BOUNDARY LOSS
+# =============================================================================
+# The raw signed distance values can be very large (up to sqrt(H²+W²) ≈ 724
+# for 512×512 images), causing unstable gradients.
+#
+# This config normalizes distance maps using tanh to bound values to [-1, 1]:
+#   normalized_dist = tanh(dist / scale)
+#
+# With scale=10.0:
+#   - Distance of 10 pixels → tanh(1) ≈ 0.76
+#   - Distance of 20 pixels → tanh(2) ≈ 0.96
+#   - Distance of 30+ pixels → ≈ 1.0
+#
+# This creates a smooth, bounded gradient signal focused on boundary regions.
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 1.0
+    BOUNDARY_WARMUP_ITERS: 0  # Enable from start
+    # Enable tanh normalization
+    BOUNDARY_NORMALIZE: True
+    # Scale factor: distances divided by this before tanh
+    # 10.0 means ~30 pixel distances saturate at ±1
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+
+OUTPUT_DIR: "./output/loveda_boundary_option2_normalized"

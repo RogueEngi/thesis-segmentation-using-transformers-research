@@ -1,0 +1,46 @@
+# =============================================================================
+# GRADUAL RAMP-UP: 40K ITERATIONS
+# =============================================================================
+# Extended training with gradual boundary loss weight ramp-up.
+#
+# Schedule:
+#   - Iter 0-5000:     weight = 0 (warmup, no boundary loss)
+#   - Iter 5000-20000: weight gradually increases 0 → 0.1 (linear ramp-up)  
+#   - Iter 20000+:     weight = 0.1 (full weight)
+#
+# This allows the model to:
+#   1. First learn basic segmentation (0-5k)
+#   2. Gradually incorporate boundary refinement (5k-20k)
+#   3. Full boundary-aware training for fine-tuning (20k-40k)
+#
+# Configuration:
+#   - BOUNDARY_WEIGHT: 0.1 (target weight after ramp-up)
+#   - BOUNDARY_WARMUP_ITERS: 5000 (no boundary loss)
+#   - BOUNDARY_RAMPUP_ITERS: 15000 (gradual increase over 15k iters)
+#   - BOUNDARY_NORMALIZE: True (tanh normalization)
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 0.1
+    BOUNDARY_WARMUP_ITERS: 5000
+    BOUNDARY_RAMPUP_ITERS: 15000  # Gradual ramp-up: full weight at iter 20000
+    BOUNDARY_NORMALIZE: True
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+
+# =============================================================================
+# SOLVER: Extended to 40k iterations
+# =============================================================================
+SOLVER:
+  MAX_ITER: 40000
+  CHECKPOINT_PERIOD: 2000
+
+# =============================================================================
+# TEST: Evaluate every 2k iterations
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 2000
+
+OUTPUT_DIR: "./output/loveda_boundary_gradual_rampup_40k"

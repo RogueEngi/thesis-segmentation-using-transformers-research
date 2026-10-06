@@ -1,0 +1,42 @@
+# =============================================================================
+# OPTION 1+2+3 COMBINED: 40K ITERATIONS
+# =============================================================================
+# Extended training to 40k iterations for the best boundary loss configuration.
+# 
+# This is the same as option1_2_3 but with 40k iterations to see if more
+# training time allows it to surpass the reference.
+#
+# Configuration:
+#   - BOUNDARY_WEIGHT: 0.1 (reduced from 1.0)
+#   - BOUNDARY_WARMUP_ITERS: 5000 (curriculum learning)
+#   - BOUNDARY_NORMALIZE: True (tanh normalization)
+#   - BOUNDARY_RAMPUP_ITERS: 0 (instant activation after warmup)
+#
+# Previous result with 20k iters: 55.25% mIoU (only -0.17% vs reference 55.42%)
+# Best was still improving at iter 15,999!
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 0.1
+    BOUNDARY_WARMUP_ITERS: 5000
+    BOUNDARY_RAMPUP_ITERS: 0
+    BOUNDARY_NORMALIZE: True
+    BOUNDARY_NORMALIZE_SCALE: 10.0
+
+# =============================================================================
+# SOLVER: Extended to 40k iterations
+# =============================================================================
+SOLVER:
+  MAX_ITER: 40000
+  CHECKPOINT_PERIOD: 2000
+
+# =============================================================================
+# TEST: Evaluate every 2k iterations
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 2000
+
+OUTPUT_DIR: "./output/loveda_boundary_option1_2_3_40k"

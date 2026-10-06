@@ -1,0 +1,30 @@
+# =============================================================================
+# LoveDa more catastrophic test!!!
+# =============================================================================
+
+_BASE_: Base-LoveDA-BoundaryLoss.yaml
+
+MODEL:
+  META_ARCHITECTURE: "MaskFormer"
+  WEIGHTS: "./output/loveda_boundary_high_weight_rampup_40k/model_final.pth"
+  MASK_FORMER:
+    BOUNDARY_WEIGHT: 100.0
+    BOUNDARY_WARMUP_ITERS: 0
+    BOUNDARY_RAMPUP_ITERS: 0
+    BOUNDARY_NORMALIZE: False
+    # BOUNDARY_NORMALIZE_SCALE: 10.0
+
+# =============================================================================
+# SOLVER:
+# =============================================================================
+SOLVER:
+  MAX_ITER: 20000
+  CHECKPOINT_PERIOD: 1000
+
+# =============================================================================
+# TEST:
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 1000
+
+OUTPUT_DIR: "./output/loveda_more_catastrophic_test"

@@ -1,0 +1,152 @@
+# =============================================================================
+# MMCV-STYLE CONFIG: Mask2Former Swin-Tiny for LoveDA
+# =============================================================================
+# This config matches MMCV/MMSegmentation's training pipeline to achieve
+# comparable results using multi-scale training.
+#
+# Based on the successful Vaihingen config that achieved 70.24% mIoU
+# (matching MMCV's 70.26%).
+#
+# LoveDA has 7 classes (with reduce_zero_label):
+# Original: 0=nodata(ignore), 1=background, 2=building, 3=road, 4=water, 5=barren, 6=forest, 7=agriculture
+# After reduce_zero_label: 0=background, 1=building, 2=road, 3=water, 4=barren, 5=forest, 6=agriculture
+# =============================================================================
+
+_BASE_: Base-LoveDA-SemanticSegmentation.yaml
+
+MODEL:
+  META_ARCHITECTURE: "MaskFormer"
+  WEIGHTS: "model_final_5274a6.pkl"
+  
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 96
+    DEPTHS: [2, 2, 6, 2]
+    NUM_HEADS: [3, 6, 12, 24]
+    WINDOW_SIZE: 7
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+  
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+  
+  SEM_SEG_HEAD:
+    NAME: "MaskFormerHead"
+    IGNORE_VALUE: 255
+    NUM_CLASSES: 7  # LoveDA has 7 classes (after reduce_zero_label: 6 valid + 1 background)
+    LOSS_WEIGHT: 1.0
+    CONVS_DIM: 256
+    MASK_DIM: 256
+    NORM: "GN"
+    PIXEL_DECODER_NAME: "MSDeformAttnPixelDecoder"
+    IN_FEATURES: ["res2", "res3", "res4", "res5"]
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["res3", "res4", "res5"]
+    COMMON_STRIDE: 4
+    TRANSFORMER_ENC_LAYERS: 6
+    
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "MultiScaleMaskedTransformerDecoder"
+    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
+    DEEP_SUPERVISION: True
+    NO_OBJECT_WEIGHT: 0.1
+    CLASS_WEIGHT: 2.0
+    MASK_WEIGHT: 5.0
+    DICE_WEIGHT: 5.0
+    BOUNDARY_WEIGHT: 0.0    # Boundary loss disabled by default.
+    HIDDEN_DIM: 256
+    NUM_OBJECT_QUERIES: 100
+    NHEADS: 8
+    DROPOUT: 0.0
+    DIM_FEEDFORWARD: 2048
+    ENC_LAYERS: 0
+    PRE_NORM: False
+    ENFORCE_INPUT_PROJ: False
+    SIZE_DIVISIBILITY: 32
+    DEC_LAYERS: 10
+    TRAIN_NUM_POINTS: 12544
+    OVERSAMPLE_RATIO: 3.0
+    IMPORTANCE_SAMPLE_RATIO: 0.75
+    TEST:
+      SEMANTIC_ON: True
+      INSTANCE_ON: False
+      PANOPTIC_ON: False
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.8
+
+# =============================================================================
+# SOLVER: Match MMCV settings
+# =============================================================================
+SOLVER:
+  # Batch size for 4GB GPU with multi-scale training
+  IMS_PER_BATCH: 2
+  
+  # Base LR: 5e-5 (same as MMCV)
+  BASE_LR: 0.00005
+  
+  # Backbone learns 10x slower
+  BACKBONE_MULTIPLIER: 0.1
+  
+  # PolyLR scheduler (MMCV default)
+  LR_SCHEDULER_NAME: "WarmupPolyLR"
+  
+  # Warmup
+  WARMUP_ITERS: 500
+  WARMUP_FACTOR: 0.01
+  
+  # LoveDA is larger than Vaihingen, train longer
+  # But with multi-scale, should converge faster
+  MAX_ITER: 20000
+  
+  CHECKPOINT_PERIOD: 2000
+  WEIGHT_DECAY: 0.05
+  WEIGHT_DECAY_NORM: 0.0
+  OPTIMIZER: "ADAMW"
+  
+  # Mixed precision for 4GB GPU
+  AMP:
+    ENABLED: True
+
+# =============================================================================
+# INPUT: MMCV-style multi-scale training (CRITICAL!)
+# =============================================================================
+INPUT:
+  # Multi-scale training parameters
+  # Reduced MAX_SCALE for 4GB GPU (2.0 -> 1.5)
+  MIN_SCALE: 0.5
+  MAX_SCALE: 1.5
+  
+  # Crop settings
+  CROP:
+    ENABLED: True
+    TYPE: "absolute"
+    SIZE: (512, 512)
+    SINGLE_CATEGORY_MAX_AREA: 0.75
+  
+  # Color augmentation
+  COLOR_AUG_SSD: True
+  
+  # Use the multi-scale dataset mapper
+  DATASET_MAPPER_NAME: "mask_former_semantic_multiscale"
+  
+  # Inference settings
+  MIN_SIZE_TEST: 512
+  MAX_SIZE_TEST: 2048
+  SIZE_DIVISIBILITY: 32
+  FORMAT: "RGB"
+
+# =============================================================================
+# TEST: Evaluation settings
+# =============================================================================
+TEST:
+  EVAL_PERIOD: 1000  # Frequent evaluation
+  AUG:
+    ENABLED: False
+
+DATALOADER:
+  NUM_WORKERS: 4
+  FILTER_EMPTY_ANNOTATIONS: True
+
+OUTPUT_DIR: "./output/loveda_multiscale"
