@@ -1,4 +1,4 @@
-# Thesis Repository: Remote Sensing Semantic Segmentation with Vision Transformers
+# Thesis Repository: Semantic Segmentation of Remote Sensing Images using Vision Transformers
 
 This repository accompanies the thesis project on semantic segmentation of remote sensing imagery.
 It is organized into two phases:
