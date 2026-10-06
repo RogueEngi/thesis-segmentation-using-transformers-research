@@ -16,10 +16,6 @@ The first phase of this repository is done using [MMSegmentation toolbox](https:
 The second phase of this repository is based on Mask2Former, the masked-attention mask transformer for universal image segmentation.
 The upstream project is preserved under `phase_two/` as the code foundation and attribution source.
 
-[Bowen Cheng](https://bowenc0221.github.io/), [Ishan Misra](https://imisra.github.io/), [Alexander G. Schwing](https://alexander-schwing.de/), [Alexander Kirillov](https://alexander-kirillov.github.io/), [Rohit Girdhar](https://rohitgirdhar.github.io/)
-
-[[`arXiv`](https://arxiv.org/abs/2112.01527)] [[`Project`](https://bowenc0221.github.io/mask2former)] [[`BibTeX`](#CitingMask2Former)]
-
 ## Installation
 
 See [installation instructions](INSTALL.md).
@@ -50,3 +46,5 @@ However portions of the project are available under separate license terms: Swin
 ## Acknowledgement
 
 Code is largely based on Mask2Former (https://github.com/facebookresearch/mask2former).
+
+As im new to Git and Github, I took suggestions from Githubs Copilot to re-structure and write markdown files. Please inform me as if you find any related issues in this repo :grimacing:.
