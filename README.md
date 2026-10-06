@@ -17,22 +17,10 @@ The second phase of this repository is based on Mask2Former, the masked-attentio
 The upstream project is preserved under `phase_two/` as the code foundation and attribution source.
 
 ## Installation
+Installation and Usage guide of the tools and libraries related to each phase of this project, is based on their upstreams official installation guides.
 
-See [installation instructions](INSTALL.md).
-
-## Getting Started
-
-See [Preparing Datasets for Mask2Former](datasets/README.md).
-
-See [Getting Started with Mask2Former](GETTING_STARTED.md).
-
-## Advanced usage
-
-See [Advanced Usage of Mask2Former](ADVANCED_USAGE.md).
-
-## Model Zoo and Baselines
-
-We provide a large set of baseline results and trained models available for download in the [Mask2Former Model Zoo](MODEL_ZOO.md).
+## Thesis
+For more information, find/get my thesis namely "Semantic Segmentation of Remote Sensing Images using Vision Transformers" or "بخش‌بندی معنایی تصاویر سنجش از دور با استفاده از ترنسفورمرهای بینایی" in Persian, from [Yazd University](https://yazd.ac.ir/en).
 
 ## License
 
